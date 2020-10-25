@@ -4,10 +4,15 @@ from requests_futures.sessions import FuturesSession
 from datetime import datetime
 import time as t
 import pandas as pd
+import os
+from tqdm import tqdm
 
 # Every race within this period of time will be retrieved
 date_start = date(2015,1,1)
 date_end = date(2015,1,3)
+data_folder = f"data/{date_start}_{date_end}"
+os.mkdir(data_folder)
+
 
 # A simple generator of date being given lower and upper bounds
 def daterange():
@@ -17,6 +22,7 @@ def daterange():
 # Retrieve programme for each date and store the responses in the array programmes
 # A programme contains a list of reunions, which contains a list of courses 
 
+print("\n> SCRAPING PROGRAMMES...")
 programmes = []
 t1 = t.time()
 with FuturesSession() as session:
@@ -26,7 +32,7 @@ with FuturesSession() as session:
         url = future_to_url[future]
         programmes.append([url, future.result()])
         
-print("Time spent for scraping programmes: %s s" % (t.time() - t1))
+print("\nTime spent: %s s" % (t.time() - t1))
 
 # Method that dynamically add a new row in the format of an hash to a table
 # If there is a key in the hash which is not present in the table columns, we add a new column
@@ -43,6 +49,7 @@ def add_row(tab, columns, json):
             
     return tab, columns
 
+print("\n> FILLING COURSES AND REUNIONS TABLES...")
 # Create the tables for storing reunions data and courses data
 reunions = []
 reunions_columns = ['date']
@@ -54,12 +61,11 @@ bad_response_columns = ['url', 'status_code']
 reunion_id = 0
 course_id = 0
 
-for url, programme in programmes:
+for url, programme in tqdm(programmes):
     # Just in case so that .json() doesn't crash
     if(programme.status_code == 200):
         programme_json = programme.json()['programme']
         date = datetime.fromtimestamp(programme_json['date']//1000).strftime("%d%m%Y")
-        print(date)
 
         for reunion in programme_json['reunions']:
             reunion_courses = reunion.pop('courses', None)
@@ -75,14 +81,17 @@ for url, programme in programmes:
     else:
         bad_response_programmes.append([url, programme.status_code])
 
+print("\n> SAVING TABLES...")
 df_reunions = pd.DataFrame(reunions, columns = reunions_columns)
 df_courses = pd.DataFrame(courses, columns = courses_columns)
 df_bad_response_programmes = pd.DataFrame(bad_response_programmes, columns = bad_response_columns)
 
-df_reunions.to_csv("reunions_%s_%s.csv" % (date_start, date_end))
-df_courses.to_csv("courses%s_%s.csv" % (date_start, date_end))
-df_bad_response_programmes.to_csv("bad_response_programmes%s_%s.csv" % (date_start, date_end))
+df_reunions.to_csv(os.path.join(data_folder, "reunions_%s_%s.csv" % (date_start, date_end)))
+df_courses.to_csv(os.path.join(data_folder, "courses%s_%s.csv" % (date_start, date_end)))
+df_bad_response_programmes.to_csv(os.path.join(data_folder, "bad_response_programmes%s_%s.csv" % (date_start, date_end)))
 
+
+print("\n> SCRAPING PARTICIPANTS...")
 # Retrieve participants for each race
 
 # We start by storing the urls corresponding to the api calls needed to get the data
@@ -110,6 +119,7 @@ with FuturesSession() as session:
         
 print("Time spent: %s s" % (t.time() - t1))
 
+print("\n> FILLING  PARTICIPANTS TABLES...")
 # And again we store everything in the table participants
 participants = []
 participants_columns = []
@@ -117,7 +127,7 @@ bad_response_participants = []
 
 participant_id = 0
 
-for url, course_participants in courses_participants:
+for url, course_participants in tqdm(courses_participants):
     if(course_participants.status_code == 200):
         participants_json = course_participants.json()['participants']
         for participant in participants_json:
@@ -128,8 +138,9 @@ for url, course_participants in courses_participants:
     else:
         bad_response_participants.append([url, course_participants.status_code])
 
+print("\n> SAVING TABLES...")
 df_participants = pd.DataFrame(participants, columns = participants_columns)
 df_bad_response_participants = pd.DataFrame(bad_response_participants, columns = bad_response_columns)
 
-df_participants.to_csv("participants_%s_%s.csv" % (date_start, date_end))
-df_bad_response_participants.to_csv("bad_response_participants_%s_%s.csv" % (date_start, date_end))
+df_participants.to_csv(os.path.join(data_folder, "participants_%s_%s.csv" % (date_start, date_end)))
+df_bad_response_participants.to_csv(os.path.join(data_folder, "bad_response_participants_%s_%s.csv" % (date_start, date_end)))
