@@ -86,8 +86,8 @@ df_reunions = pd.DataFrame(reunions, columns = reunions_columns)
 df_courses = pd.DataFrame(courses, columns = courses_columns)
 df_bad_response_programmes = pd.DataFrame(bad_response_programmes, columns = bad_response_columns)
 
-df_reunions.to_csv(os.path.join(data_folder, "reunions_%s_%s.csv" % (date_start, date_end)))
-df_courses.to_csv(os.path.join(data_folder, "courses%s_%s.csv" % (date_start, date_end)))
+df_reunions.to_csv(os.path.join(data_folder, "reunions.csv"))
+df_courses.to_csv(os.path.join(data_folder, "courses.csv"))
 df_bad_response_programmes.to_csv(os.path.join(data_folder, "bad_response_programmes%s_%s.csv" % (date_start, date_end)))
 
 
@@ -142,5 +142,5 @@ print("\n> SAVING TABLES...")
 df_participants = pd.DataFrame(participants, columns = participants_columns)
 df_bad_response_participants = pd.DataFrame(bad_response_participants, columns = bad_response_columns)
 
-df_participants.to_csv(os.path.join(data_folder, "participants_%s_%s.csv" % (date_start, date_end)))
-df_bad_response_participants.to_csv(os.path.join(data_folder, "bad_response_participants_%s_%s.csv" % (date_start, date_end)))
+df_participants.to_csv(os.path.join(data_folder, "participants.csv"))
+df_bad_response_participants.to_csv(os.path.join(data_folder, "bad_response_participants.csv"))
