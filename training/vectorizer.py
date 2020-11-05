@@ -1,5 +1,6 @@
 from sklearn.preprocessing import LabelEncoder
 import numpy as np
+import re
 
 NUMERICAL_COLUMNS = ["nombreCourses", "nombreVictoires", "nombrePlaces"]
 CATEGORICAL_COLUMNS = ["oeilleres", "deferre"]
@@ -21,6 +22,30 @@ class SimpleVectorizer():
             self.label_encoders[i] = le
             self.columns.append(col)
 
+
+        l.append(df["musique"].apply(self.musique_to_score).to_list())
+        self.columns.append("musique")
+
         X = np.array(l).T
         return X
 
+    def musique_to_score(self, musique, default_score=6):
+        if musique in ["-"]:
+            return default_score
+
+        resultats = re.split("[a-z]+", musique)[:-1]
+
+        def resultats_to_score(resultat):
+            # (2019)8 becomes 8
+            resultat = re.sub("\(\d+\)", "", resultat)
+            if resultat in ["D", "Ret", "R"]:
+                return 6
+            elif resultat in ["A", "T"]:
+                return 11
+            elif int(resultat) in range(1,9):
+                return int(resultat)
+            else:
+                return 11
+
+        scores = list(map(resultats_to_score, resultats))
+        return np.mean(scores)

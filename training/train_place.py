@@ -1,7 +1,10 @@
 # IMPORTS
 import pandas as pd
+import numpy as np
 from vectorizer import SimpleVectorizer
 from functools import reduce
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import cross_validate
 
 # CODE
 """
@@ -25,3 +28,11 @@ y = df[["numPmu", "places"]].apply(lambda x: (x[0] in x[1]), axis=1).to_list()
 print(len(y))
 
 # Train a model
+lr = LogisticRegression()
+cv_results = cross_validate(lr, X, y, scoring=["accuracy", "roc_auc"])
+print(cv_results["test_accuracy"])
+print(cv_results["test_roc_auc"])
+
+lr.fit(X, y)
+print(np.mean(lr.predict(X)))
+print(np.mean(y))
