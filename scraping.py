@@ -6,6 +6,7 @@ import time as t
 import pandas as pd
 import os
 from tqdm import tqdm
+import json
 
 # Every race within this period of time will be retrieved
 date_start = date(2015,1,1)
@@ -19,20 +20,19 @@ def daterange():
     for n in range(int ((date_end - date_start).days)+1):
         yield (date_start + timedelta(n)).strftime("%d%m%Y")
 
-# Retrieve programme for each date and store the responses in the array programmes
-# A programme contains a list of reunions, which contains a list of courses 
-
-print("\n> SCRAPING PROGRAMMES...")
-programmes = []
-t1 = t.time()
-with FuturesSession() as session:
-    urls = ["https://online.turfinfo.api.pmu.fr/rest/client/1/programme/%s?meteo=true&specialisation=INTERNET" % date for date in daterange()]
-    future_to_url = {session.get(url): url for url in urls}
-    for future in as_completed(future_to_url):
-        url = future_to_url[future]
-        programmes.append([url, future.result()])
-        
-print("\nTime spent: %s s" % (t.time() - t1))
+# Method that maps a list of urls to their respective api responses
+def scrap_urls(urls, message):
+    print(f"\n> SCRAPING {message}...")
+    data = []
+    t1 = t.time()
+    with FuturesSession() as session:
+        future_to_url = {session.get(url): url for url in urls}
+        for future in as_completed(future_to_url):
+            url = future_to_url[future]
+            data.append([url, future.result()])
+            
+    print("\nTime spent: %s s" % (t.time() - t1))
+    return data
 
 # Method that dynamically add a new row in the format of an hash to a table
 # If there is a key in the hash which is not present in the table columns, we add a new column
@@ -48,6 +48,12 @@ def add_row(tab, columns, json):
     tab.append(row)
             
     return tab, columns
+
+# Retrieve programme for each date and store the responses in the array programmes
+# A programme contains a list of reunions, which contains a list of courses 
+urls = ["https://online.turfinfo.api.pmu.fr/rest/client/1/programme/%s?meteo=true&specialisation=INTERNET" % date for date in daterange()]
+programmes = scrap_urls(urls, "PROGRAMMES")
+
 
 print("\n> FILLING COURSES AND REUNIONS TABLES...")
 # Create the tables for storing reunions data and courses data
@@ -91,11 +97,11 @@ df_courses.to_csv(os.path.join(data_folder, "courses.csv"))
 df_bad_response_programmes.to_csv(os.path.join(data_folder, "bad_response_programmes%s_%s.csv" % (date_start, date_end)))
 
 
-print("\n> SCRAPING PARTICIPANTS...")
-# Retrieve participants for each race
 
+# Retrieve participants for each race
 # We start by storing the urls corresponding to the api calls needed to get the data
 urls = []
+rapports_urls = []
 
 url_to_course_id = {}
 numReunion_index, numOrdre_index = courses_columns.index('numReunion'), courses_columns.index('numOrdre')
@@ -108,18 +114,15 @@ for course in courses:
     urls.append(url)
     url_to_course_id[url] = course_id
 
-# Here we actually do api calls
-t1 = t.time()
-with FuturesSession() as session:
-    courses_participants = []
-    future_to_url = {session.get(url): url for url in urls}
-    for future in as_completed(future_to_url):
-        url = future_to_url[future]
-        courses_participants.append([url, future.result()])
-        
-print("Time spent: %s s" % (t.time() - t1))
+    rapports_url = "https://online.turfinfo.api.pmu.fr/rest/client/1/programme/%s/%s/rapports-definitifs" % (date, course_number)
+    rapports_urls.append(rapports_url)
+    url_to_course_id[rapports_url] = course_id
 
-print("\n> FILLING  PARTICIPANTS TABLES...")
+# Here we actually do api calls
+courses_participants = scrap_urls(urls, "PARTICIPANTS")
+rapports = scrap_urls(rapports_urls, "RAPPORTS")
+
+print("\n> FILLING  PARTICIPANTS AND RAPPORTS TABLES...")
 # And again we store everything in the table participants
 participants = []
 participants_columns = []
@@ -138,9 +141,20 @@ for url, course_participants in tqdm(courses_participants):
     else:
         bad_response_participants.append([url, course_participants.status_code])
 
+rapports_definitifs = {}
+for url, rapport in tqdm(rapports):
+
+    if(rapport.status_code == 200):
+        rapports_definitifs[url_to_course_id[url]] = rapport.json()
+    else:
+        rapports_definitifs[url_to_course_id[url]] = "Scraping failed"
+
 print("\n> SAVING TABLES...")
 df_participants = pd.DataFrame(participants, columns = participants_columns)
 df_bad_response_participants = pd.DataFrame(bad_response_participants, columns = bad_response_columns)
 
 df_participants.to_csv(os.path.join(data_folder, "participants.csv"))
 df_bad_response_participants.to_csv(os.path.join(data_folder, "bad_response_participants.csv"))
+
+with open(os.path.join(data_folder, "rapports_definitis.json"), "w") as f:
+    json.dump(rapports_definitifs, f, indent=4, sort_keys=True)
