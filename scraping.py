@@ -9,8 +9,8 @@ from tqdm import tqdm
 import json
 
 # Every race within this period of time will be retrieved
-date_start = date(2015,1,1)
-date_end = date(2015,1,3)
+date_start = date(2017,1,2)
+date_end = date(2019,1,1)
 data_folder = f"data/{date_start}_{date_end}"
 os.mkdir(data_folder)
 
@@ -156,5 +156,5 @@ df_bad_response_participants = pd.DataFrame(bad_response_participants, columns =
 df_participants.to_csv(os.path.join(data_folder, "participants.csv"))
 df_bad_response_participants.to_csv(os.path.join(data_folder, "bad_response_participants.csv"))
 
-with open(os.path.join(data_folder, "rapports_definitis.json"), "w") as f:
+with open(os.path.join(data_folder, "rapports_definitifs.json"), "w") as f:
     json.dump(rapports_definitifs, f, indent=4, sort_keys=True)
