@@ -30,7 +30,7 @@ class SimpleVectorizer():
         return X
 
     def musique_to_score(self, musique, default_score=6):
-        if musique in ["-"]:
+        if not isinstance(musique, str) or musique in ["-", "couru afasec"]:
             return default_score
 
         resultats = re.split("[a-z]+", musique)[:-1]
@@ -38,7 +38,7 @@ class SimpleVectorizer():
         def resultats_to_score(resultat):
             # (2019)8 becomes 8
             resultat = re.sub("\(\d+\)", "", resultat)
-            if resultat in ["D", "Ret", "R"]:
+            if resultat in ["D", "R", "I", "é"]:
                 return 6
             elif resultat in ["A", "T"]:
                 return 11
