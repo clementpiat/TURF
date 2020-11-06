@@ -2,8 +2,8 @@ from sklearn.preprocessing import LabelEncoder
 import numpy as np
 import re
 
-NUMERICAL_COLUMNS = ["nombreCourses", "nombreVictoires", "nombrePlaces"]
-CATEGORICAL_COLUMNS = ["oeilleres", "deferre"]
+NUMERICAL_COLUMNS = ["nombreCourses", "nombreVictoires", "nombrePlaces", "placeCorde"]
+CATEGORICAL_COLUMNS = ["oeilleres", "deferre", "sexe", "race"]
 
 class SimpleVectorizer():
     def __init__(self):
@@ -22,9 +22,13 @@ class SimpleVectorizer():
             self.label_encoders[i] = le
             self.columns.append(col)
 
-
+        # musique
         l.append(df["musique"].apply(self.musique_to_score).to_list())
         self.columns.append("musique")
+        # gains
+        l.append(df["gainsParticipant"].apply(lambda d: eval(d)["gainsCarriere"] if eval(d) else 0).to_list())
+        l.append(df["gainsParticipant"].apply(lambda d: eval(d)["gainsAnneeEnCours"] if eval(d) else 0).to_list())
+        self.columns += ["gainsCarriere", "gainsAnneeEnCours"]
 
         X = np.array(l).T
         return X

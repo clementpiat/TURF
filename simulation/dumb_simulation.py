@@ -1,5 +1,5 @@
 import numpy as np
-from simulation import Simulation
+from ._simulation import Simulation
 
 class DumbSimulation(Simulation):
     """
@@ -25,7 +25,7 @@ class DumbSimulation(Simulation):
                 else:
                     if len(rapports) >= p+1:
                         pari = sorted(rapports)[p][1]
-                        self.pari_simple_place(pari, course_id)
+                        self.pari_simple_place(pari, prev_course_id)
 
                     rapports = [(rapport, numPmu)]
                     prev_course_id = course_id

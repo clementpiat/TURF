@@ -1,28 +1,27 @@
 from functools import reduce
-import random
 from ._simulation import Simulation
 
-class RandomSimulation(Simulation):
+class ModelSimulation(Simulation):
     """
-    Pari à chaque course sur un cheval aléatoire en simple placé
+    Pari à chaque course sur le cheval le plus probable selon un modèle
     """
     def __init__(self, rapports, participants):
         super().__init__(rapports)
         self.participants = participants
-        
+
     def simulate(self):
         self.gain = 0
         self.gains = []
         self.victoires = []
 
         prev_course_id = self.participants[0,0]
-        numPmus = []
-        for course_id, numPmu in self.participants:
+        probas = []
+        for course_id, numPmu, winning_probability in self.participants:
             if course_id == prev_course_id:
-                numPmus.append(numPmu)
+                probas.append((winning_probability, numPmu))
             else:
-                pari = random.choice(numPmus)
+                pari = max(probas)[1]
                 self.pari_simple_place(pari, prev_course_id)
 
-                numPmus = [numPmu]
+                probas = [(winning_probability, numPmu)]
                 prev_course_id = course_id

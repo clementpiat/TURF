@@ -1,3 +1,4 @@
+# TODO: refactor even more since they all have participants attributes
 class Simulation():
     def __init__(self, rapports):
         self.rapports = rapports
@@ -6,7 +7,7 @@ class Simulation():
         pass
 
     def pari_simple_place(self, pari, course_id):
-        pari, course_id = str(pari), str(course_id)
+        pari, course_id = str(int(pari)), str(int(course_id))
         if self.rapports[course_id] != "Scraping failed":
             paris_place = list(filter(lambda r: r["typePari"] in ["SIMPLE_PLACE", "SIMPLE_PLACE_INTERNATIONAL"], self.rapports[course_id]))
             if paris_place:
