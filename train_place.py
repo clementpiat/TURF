@@ -10,6 +10,7 @@ from datetime import datetime
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import cross_validate
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
 
 from training.vectorizer import SimpleVectorizer
 from training.preprocesser import Preprocesser
@@ -47,16 +48,19 @@ models = [
 ]
 for model in models:
     print(f"\n***** {type(model).__name__} *****")
-    cv_results = cross_validate(model, X, y, scoring=["accuracy", "roc_auc", "f1_weighted"])
+    cv_results = cross_validate(model, X, y, scoring=["accuracy", "roc_auc", "precision", "recall", "f1_weighted"])
     print(f"Accuracy: {cv_results['test_accuracy']}")
+    print(f"Precision: {cv_results['test_precision']}")
+    print(f"Recall: {cv_results['test_recall']}")
     print(f"AUC: {cv_results['test_roc_auc']}")
-    print(f"F1: {cv_results['test_f1_weighted']}\n")
+    print(f"F1 weighted: {cv_results['test_f1_weighted']}\n")
 
-    model.fit(X, y)
-    y_pred = model.predict(X)
-    plot_confusion_matrix(y, y_pred)
+    X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.3)
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    plot_confusion_matrix(y_test, y_pred)
     print(f"\nPourcentage de victoires prédites: {np.mean(y_pred)}")
-    print(f"Pourcentage réelle: {np.mean(y)}")
+    print(f"Pourcentage réelle: {np.mean(y_test)}")
 
 # Optionally save model
 if False:
