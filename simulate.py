@@ -15,7 +15,7 @@ from training.preprocesser import Preprocesser
 
 # CODE
 date = "2017-01-02_2019-01-01"
-model_folder = "06_11_2020-10h58m07s"
+model_folder = "09_11_2020-16h16m00s"
 
 # Load data
 df_courses = pd.read_csv(f"data/{date}/courses.csv", low_memory=False)
@@ -56,7 +56,7 @@ for k in tqdm(range(k)):
     legends.append("Paris Random")
 
 ds = DumbSimulation(rapports, dumb_participants)
-for p in tqdm(range(3)):
+for p in tqdm(range(1)):
     ds.simulate(p=p)
     plt.plot(ds.gains)
     legends.append(f"Paris {p+1}ème côte la plus faible")
@@ -67,7 +67,11 @@ plt.ylabel("Gains en euros")
 plt.xlabel("Nombre de paris")
 plt.title(f"Evolution du gains pour la stratégie pari aléatoire à chaque course ({k} simulations aléatoires)")
 
-plt.text(0,-4000,f"Nombre de victoires aléatoires: {sum(rs.victoires)}\nNombre de victoires naives: {sum(ds.victoires)}")
+text = '\n'.join([
+    f"Nombre de victoires modèle: {sum(ms.victoires)}",
+    f"Nombre de victoires naives: {sum(ds.victoires)}"
+])
+plt.text(0,-4000,text)
 
 plt.show()
 
