@@ -11,8 +11,9 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import cross_validate
 from sklearn.ensemble import RandomForestClassifier
 
-from vectorizer import SimpleVectorizer
-from preprocesser import Preprocesser
+from training.vectorizer import SimpleVectorizer
+from training.preprocesser import Preprocesser
+from utils.utils import plot_confusion_matrix
 
 # CODE
 """
@@ -41,21 +42,24 @@ print(f"Number of samples: {len(y)}")
 
 # Train simple models
 models = [
-    LogisticRegression(class_weight="balanced"),
+    LogisticRegression(),
     RandomForestClassifier(class_weight="balanced")
 ]
 for model in models:
     print(f"\n***** {type(model).__name__} *****")
-    cv_results = cross_validate(model, X, y, scoring=["accuracy", "roc_auc"])
+    cv_results = cross_validate(model, X, y, scoring=["accuracy", "roc_auc", "f1_weighted"])
     print(f"Accuracy: {cv_results['test_accuracy']}")
     print(f"AUC: {cv_results['test_roc_auc']}")
+    print(f"F1: {cv_results['test_f1_weighted']}\n")
 
     model.fit(X, y)
-    print(f"Pourcentage de victoires prédites: {np.mean(model.predict(X))}")
+    y_pred = model.predict(X)
+    plot_confusion_matrix(y, y_pred)
+    print(f"\nPourcentage de victoires prédites: {np.mean(y_pred)}")
     print(f"Pourcentage réelle: {np.mean(y)}")
 
 # Optionally save model
-if True:
+if False:
     name = datetime.now().strftime("%d_%m_%Y-%Hh%Mm%Ss")
     model = models[-1]
 

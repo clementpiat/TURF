@@ -2,8 +2,9 @@ from sklearn.preprocessing import LabelEncoder
 import numpy as np
 import re
 
-NUMERICAL_COLUMNS = ["nombreCourses", "nombreVictoires", "nombrePlaces", "placeCorde"]
-CATEGORICAL_COLUMNS = ["oeilleres", "deferre", "sexe", "race"]
+NUMERICAL_COLUMNS = ["nombreCourses", "nombreVictoires", "nombrePlaces", "handicapPoids", "tauxReclamation", "placeCorde", 
+"poidsConditionMonte", "nombrePlacesSecond", "nombrePlacesTroisieme", "handicapValeur"]
+CATEGORICAL_COLUMNS = ["oeilleres", "deferre", "sexe", "race", "age", "numPmu", "statut"]
 
 class SimpleVectorizer():
     def __init__(self):
@@ -13,6 +14,7 @@ class SimpleVectorizer():
     def transform(self, df):
         n,_ = df.shape
 
+        df[NUMERICAL_COLUMNS] = df[NUMERICAL_COLUMNS].fillna(df[NUMERICAL_COLUMNS].mean())
         l = [df[col].to_list() for col in NUMERICAL_COLUMNS]
         self.columns += NUMERICAL_COLUMNS
 
