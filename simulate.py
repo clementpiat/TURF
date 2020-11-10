@@ -42,6 +42,12 @@ if model_folder:
 # Simulate
 legends = []
 
+gs = GodSimulation(rapports, np.unique(df_participants[["course_id"]]))
+for p in [0.3, 0.4, 1]:
+    gs.simulate(p=p)
+    plt.plot(gs.gains)
+    legends.append(f"Godlike bet p={p}")
+
 if model_folder:
     ms = ModelSimulation(rapports, model_participants)
     ms.simulate()
