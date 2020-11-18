@@ -1,2 +1,2 @@
 # TURF
-PMU website scraping and predictive models
+Horse races predictive model
