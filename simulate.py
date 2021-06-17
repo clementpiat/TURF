@@ -10,7 +10,7 @@ import json
 
 from simulation import *
 
-from training.vectorizer import SimpleVectorizer
+from training.simple_vectorizer import SimpleVectorizer
 from training.preprocesser import Preprocesser
 
 # CODE

@@ -12,7 +12,7 @@ from sklearn.model_selection import cross_validate
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 
-from training.vectorizer import SimpleVectorizer
+from training.simple_vectorizer import SimpleVectorizer
 from training.preprocesser import Preprocesser
 from utils.utils import plot_confusion_matrix
 
@@ -43,8 +43,8 @@ print(f"Number of samples: {len(y)}")
 
 # Train simple models
 models = [
-    LogisticRegression(),
-    RandomForestClassifier(class_weight="balanced")
+    # LogisticRegression(),
+    RandomForestClassifier(class_weight="balanced", n_estimators=30, max_features=None, min_samples_leaf=1, min_samples_split=2)
 ]
 for model in models:
     print(f"\n***** {type(model).__name__} *****")
@@ -61,6 +61,16 @@ for model in models:
     plot_confusion_matrix(y_test, y_pred)
     print(f"\nPourcentage de victoires prédites: {np.mean(y_pred)}")
     print(f"Pourcentage réelle: {np.mean(y_test)}")
+
+    if type(model).__name__ != "RandomForestClassifier":
+        continue 
+
+    feature_importances = model.feature_importances_
+    sum_ = sum(feature_importances)
+    sorted_f = sorted([(-imp/sum_*100, vec.columns[i]) for i, imp in enumerate(feature_importances)])
+    print("\nFeature Importances")
+    for score, col in sorted_f:
+        print(f"{col}: {-int(score)}%")
 
 # Optionally save model
 if False:

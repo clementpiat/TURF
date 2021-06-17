@@ -9,8 +9,8 @@ from tqdm import tqdm
 import json
 
 # Every race within this period of time will be retrieved
-date_start = date(2017,1,2)
-date_end = date(2019,1,1)
+date_start = date(2019,1,2)
+date_end = date(2021,1,1)
 data_folder = f"data/{date_start}_{date_end}"
 os.mkdir(data_folder)
 

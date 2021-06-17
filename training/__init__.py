@@ -1,2 +1,2 @@
 from .preprocesser import Preprocesser
-from .vectorizer import SimpleVectorizer
+from .simple_vectorizer import SimpleVectorizer
