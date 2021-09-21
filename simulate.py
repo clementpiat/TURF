@@ -14,8 +14,8 @@ from training.simple_vectorizer import SimpleVectorizer
 from training.preprocesser import Preprocesser
 
 # CODE
-date = "2015-01-01_2015-01-03"
-model_folder = "09_11_2020-16h16m00s"
+date = "2015-01-01_2017-01-01"
+model_folder = "21_09_2021-16h27m45s"
 
 # Load data
 df_courses = pd.read_csv(f"data/{date}/courses.csv", low_memory=False)
@@ -24,12 +24,12 @@ with open(f"data/{date}/rapports_definitifs.json", "r") as f:
     rapports = json.load(f)
 
 # Prepare data for the simulations
-# TODO: we should preprocess even without model
+# TODO: we should preprocess even without model (low priority)
 if model_folder:
     model = load(os.path.join("models", model_folder, "clf.joblib"))
     with open(os.path.join("models", model_folder, "config.json"), "r") as f:
         d = json.load(f)
-    preprocesser = Preprocesser(d["specialite"], needed_columns=d["needed_columns"])
+    preprocesser = Preprocesser(d["specialite"], needed_columns=d["needed_columns"] + ["dernierRapportDirect"])
     df_participants = preprocesser.filter_rows(df_participants, df_courses)
 
 random_participants = np.array(df_participants[["course_id", "numPmu"]])
@@ -43,7 +43,7 @@ if model_folder:
 legends = []
 
 gs = GodSimulation(rapports, np.unique(df_participants[["course_id"]]))
-for p in [0.3, 0.4, 1]:
+for p in [0.3, 0.4]:
     gs.simulate(p=p)
     plt.plot(gs.gains)
     legends.append(f"Godlike bet p={p}")
@@ -65,7 +65,7 @@ ds = DumbSimulation(rapports, dumb_participants)
 for p in tqdm(range(1)):
     ds.simulate(p=p)
     plt.plot(ds.gains)
-    legends.append(f"Paris {p+1}ème côte la plus faible")
+    legends.append(f"Paris {p+1}{'ème' if p else 'ère'} côte la plus faible")
 
 plt.legend(legends)
 

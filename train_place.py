@@ -9,8 +9,12 @@ from datetime import datetime
 
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.neural_network import MLPClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 from sklearn.model_selection import cross_validate
 from sklearn.model_selection import train_test_split
+from imblearn.under_sampling import RandomUnderSampler
 
 from training.simple_vectorizer import SimpleVectorizer
 from training.preprocesser import Preprocesser
@@ -23,7 +27,7 @@ TASK: predire si un cheval va se placer / Binary Classification
 # Constants
 date = "2015-01-01_2017-01-01"
 specialite = "PLAT"
-needed_columns = ["ordreArrivee"]
+needed_columns = ["ordreArrivee", "gainsParticipant"]
 
 # Load
 df_participants = pd.read_csv(f"data/{date}/participants.csv", low_memory=False)
@@ -39,28 +43,35 @@ X = vec.transform(df)
 
 # Create target labels / Create y
 y = df["ordreArrivee"].apply(lambda x: int(x) in [1,2,3]).to_list()
+
+# Undersampling
+X,y = RandomUnderSampler().fit_resample(X,y)
 print(f"Number of samples: {len(y)}")
 
 # Train simple models
 models = [
-    # LogisticRegression(),
-    RandomForestClassifier(class_weight="balanced", n_estimators=30, max_features=None, min_samples_leaf=1, min_samples_split=2)
+    LogisticRegression(class_weight="balanced"), # fast
+    # KNeighborsClassifier(5), # long
+    # MLPClassifier(hidden_layer_sizes=(20,20)), # long
+    RandomForestClassifier(class_weight="balanced", max_depth=5, n_estimators=20, max_features=1), # fast
+    AdaBoostClassifier(), # medium
 ]
+
+scoring = ["accuracy", "roc_auc", "precision", "recall", "f1_weighted"]
 for model in models:
-    print(f"\n***** {type(model).__name__} *****")
-    cv_results = cross_validate(model, X, y, scoring=["accuracy", "roc_auc", "precision", "recall", "f1_weighted"])
-    print(f"Accuracy: {cv_results['test_accuracy']}")
-    print(f"Precision: {cv_results['test_precision']}")
-    print(f"Recall: {cv_results['test_recall']}")
-    print(f"AUC: {cv_results['test_roc_auc']}")
-    print(f"F1 weighted: {cv_results['test_f1_weighted']}\n")
+    print(f"\n***** {type(model).__name__} *****\n")
+    cv_results = cross_validate(model, X, y, scoring=scoring)
+    for score in scoring:
+        results = cv_results[f"test_{score}"]
+        print(f"{score.upper()}: {np.mean(results)} - {results}")
 
     X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.3)
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
+    print("")
     plot_confusion_matrix(y_test, y_pred)
     print(f"\nPourcentage de victoires prédites: {np.mean(y_pred)}")
-    print(f"Pourcentage réelle: {np.mean(y_test)}")
+    print(f"Pourcentage de victoires réelles: {np.mean(y_test)}")
 
     if type(model).__name__ != "RandomForestClassifier":
         continue 
