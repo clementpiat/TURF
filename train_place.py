@@ -8,8 +8,8 @@ import json
 from datetime import datetime
 
 from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import cross_validate
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import cross_validate
 from sklearn.model_selection import train_test_split
 
 from training.simple_vectorizer import SimpleVectorizer

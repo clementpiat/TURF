@@ -14,7 +14,7 @@ from training.simple_vectorizer import SimpleVectorizer
 from training.preprocesser import Preprocesser
 
 # CODE
-date = "2017-01-02_2019-01-01"
+date = "2015-01-01_2015-01-03"
 model_folder = "09_11_2020-16h16m00s"
 
 # Load data
