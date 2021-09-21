@@ -5,7 +5,7 @@ Horse races predictive model
 
 ## Training a model
 
-Train a model (sklearn classifier and pytorch network) that predicts between horses, which one will perform better.
+Train a model (sklearn classifier and pytorch network) that predicts if a horse is going to finish in the first positions.
 ```
 python train_place.py
 ```
