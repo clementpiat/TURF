@@ -2,6 +2,7 @@ data/*
 *.ipynb
 *.pyc
 models/*
+
 ./scraping.py
 .ipynb_checkpoints
 !data/2015-01-01_2015-01-03
