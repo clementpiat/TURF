@@ -9,7 +9,7 @@ Train a model (sklearn classifier and pytorch network) that predicts if a horse 
 ```
 python train_place.py
 ```
-Edit the constants directly in the script.
+Edit the variables directly in the script.
 ```
 date = "2015-01-01_2017-01-01"
 specialite = "PLAT"
@@ -21,7 +21,7 @@ needed_columns = ["ordreArrivee"]
 ```
 python simulate.py
 ```
-Edit the constants directly in the script.
+Edit the variables directly in the script.
 ```
 date = "2015-01-01_2015-01-03"
 model_folder = "09_11_2020-16h16m00s"
